@@ -41,6 +41,9 @@ namespace HomeLibrary
                         ShowAllBooks(books);
                         break;
 
+                    case "3":
+                        break;
+
                     case "4":
                         if (books.Count == 0)
                         {
@@ -202,6 +205,11 @@ namespace HomeLibrary
 
                     modelBook.Status = (StatusReading)newStatus;
                 }
+            }
+            else
+            {
+                Console.WriteLine("Некоректные данные.");
+                return;
             }
         }
     }
