@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 
 namespace HomeLibrary
@@ -17,6 +20,13 @@ namespace HomeLibrary
         {
             ModelBook book = new ModelBook();
             List<ModelBook> books = new List<ModelBook>();
+
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "books.txt");
+            if (File.Exists(filePath))
+            {
+                string json = File.ReadAllText(filePath);
+                books = System.Text.Json.JsonSerializer.Deserialize<List<ModelBook>>(json) ?? new List<ModelBook>();
+            }
 
             bool isStarted = true;
             do
@@ -53,7 +63,17 @@ namespace HomeLibrary
                         ChangeStatusBook(books);
                         break;
 
+                    case "5":
+                        if (books.Count == 0)
+                        {
+                            Console.WriteLine("Список книг пуст.");
+                            continue;
+                        }
+                        Statistics(books);
+                        break;
+
                     case "6":
+                        SaveBooks(books, filePath);
                         isStarted = false;
                         break;
 
@@ -211,6 +231,48 @@ namespace HomeLibrary
                 Console.WriteLine("Некоректные данные.");
                 return;
             }
+        }
+
+        static void SaveBooks(List<ModelBook> books, string filePath)
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+            };
+            string json = JsonSerializer.Serialize(books, options);
+            try
+            {
+                File.WriteAllText(filePath, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при сохранении данных: {ex.Message}");
+            }
+        }
+
+        static void Statistics(List<ModelBook> books)
+        {
+            int finishedBooks = books.Count(b => b.Status == HomeLibrary.StatusReading.Finished);
+            int readingBooks = books.Count(b => b.Status == HomeLibrary.StatusReading.Reading);
+            int notStarted = books.Count(b => b.Status == HomeLibrary.StatusReading.NotStarted);
+
+            DrawBar("Прочитано", finishedBooks, books.Count, ConsoleColor.Green);
+            DrawBar("Читаю", readingBooks, books.Count, ConsoleColor.Yellow);
+            DrawBar("Не начато", notStarted, books.Count, ConsoleColor.DarkCyan);
+        }
+
+        static void DrawBar(string status, int booksCount, int allBooks, ConsoleColor color)
+        {
+            const int barWidth = 20;
+            int filledWidth = (int)((double)booksCount / allBooks * barWidth);
+            int emptyWidth = barWidth - filledWidth;
+            string bar = new string('█', filledWidth) + new string('░', emptyWidth);
+
+            Console.ForegroundColor = color;
+            Console.Write($"\n{status}: ");
+            Console.ResetColor();
+            Console.WriteLine($"{bar} {booksCount}\n");
         }
     }
 }
