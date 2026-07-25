@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Unicode;
 using System.Threading.Tasks;
 
@@ -102,10 +103,13 @@ namespace HomeLibrary
             if (status == 0)
                 return;
 
-            int grade = GradeBook();
-            if (grade == 0)
-                return;
-
+            int grade = 0;
+            if (status == 3)
+            {
+                grade = GradeBook();
+                if (grade == 0)
+                    return;
+            }
 
             books.Add(new ModelBook
             {
@@ -113,10 +117,9 @@ namespace HomeLibrary
                 Name = name,
                 Author = author,
                 Status = (StatusReading)status,
-                Grade = grade
+                Grade = grade 
             });
             Console.WriteLine();
-
         }
 
         static string NameBookOrNameAuthor(string message) // Возвращает нназвание книги и имя автора
@@ -140,7 +143,7 @@ namespace HomeLibrary
         {
             while (true)
             {
-                Console.Write("\nВернуться в меню - x\nВведите статус чтения. \n1 - Не начато \n2 - Читаю \n3 - Прочитано\n: ");
+                Console.Write("\nВернуться в меню - x\n1 - Не начато \n2 - Читаю \n3 - Прочитано\nВведите статус чтения: ");
                 string input = Console.ReadLine();
 
                 if (int.TryParse(input, out int status) && status >= 1 && status <= 3)
@@ -156,7 +159,7 @@ namespace HomeLibrary
         {
             while (true)
             {
-                Console.Write("\nВернуться в меню - x\nВведите оценку книги от 1 до 10\n: ");
+                Console.Write("\nВернуться в меню - x\nВведите оценку книги от 1 до 10: ");
                 string input = Console.ReadLine();
 
                 if (int.TryParse(input, out int grade) && grade >= 1 && grade <= 10)
@@ -172,13 +175,15 @@ namespace HomeLibrary
         static void ShowAllBooks(List<ModelBook> books) // Показать все книги
         {
             ShowColorStatusBookDelegate showColorStatusBook = ShowColorStatusBook;
-            Console.WriteLine("\n===Список книг===");
+            Console.WriteLine("\n===Список книг===\n");
+            Console.WriteLine($"{"ID", -5} {"Название", -30} {"Автор", -20} {"Оценка", -10} {"Статус", -5}");
+            Console.WriteLine(new string('-', 75));
             foreach (var book in books)
             {
-                Console.Write($"ID: {book.Id}\nНазвание: {book.Name}\nАвтор: {book.Author}\nСтатус: ");
+                Console.Write($"{book.Id, -5} {book.Name, -30} {book.Author, -20} {book.Grade, -10}");
                 showColorStatusBook(book);
-                Console.WriteLine($"Оценка: {book.Grade}\n");
             }
+            Console.WriteLine();
         }
 
         static ConsoleColor GetStatusColor(StatusReading status) // Возвращает цвет статуса чтения
@@ -196,18 +201,19 @@ namespace HomeLibrary
         {
             GetStatusColorBook statusColorBook = GetStatusColor;
             Console.ForegroundColor = statusColorBook(book.Status);
-            Console.WriteLine(book.Status);
+            Console.WriteLine(book.Status + "\n");
             Console.ResetColor();
         }
 
         static void ChangeStatusBook(List<ModelBook> books) // Изменить статус чтения книги
         {
             ShowColorStatusBookDelegate showColorStatusBook = ShowColorStatusBook;
-            Console.WriteLine($"ID\tНазвание\tСтатус");
+            Console.WriteLine($"{"ID", -5} {"Название", -30} {"Статус"}");
+            Console.WriteLine(new string('-', 50));
 
             foreach (var book in books)
             {
-                Console.Write($"{book.Id}\t{book.Name}\t");
+                Console.Write($"{book.Id, -5} {book.Name, -30}");
                 showColorStatusBook(book);
             }
             Console.Write("\nЧтобы изменить статус чтения, введите ID книги: ");
@@ -224,6 +230,14 @@ namespace HomeLibrary
                         return;
 
                     modelBook.Status = (StatusReading)newStatus;
+
+                    if (newStatus == 3)
+                    {
+                        int newGrade = GradeBook();
+                        if (newGrade == 0)
+                            return;
+                        modelBook.Grade = newGrade;
+                    }
                 }
             }
             else
