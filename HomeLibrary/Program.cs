@@ -33,7 +33,7 @@ namespace HomeLibrary
             do
             {
                 Console.WriteLine("===Домашняя библиотека===");
-                Console.WriteLine("\n1 - Добавить книгу\n2 - Показать все книги\n3 - Найти книгу\n4 - Изменить статус чтения\n4 - Уддалить книгу\n5 - Статистика\n6 - Сохранить и выйти");
+                Console.WriteLine("\n1 - Добавить книгу\n2 - Показать все книги\n3 - Найти книгу\n4 - Изменить статус чтения\n5 - Статистика\n6 - Изменить книгу\n7 - Сохранить и выйти");
 
                 string input = Console.ReadLine();
 
@@ -49,10 +49,16 @@ namespace HomeLibrary
                             Console.WriteLine("Список книг пуст.");
                             continue;
                         }
-                        ShowAllBooks(books);
+                        ShowBooks(books);
                         break;
 
                     case "3":
+                        if (books.Count == 0)
+                        {
+                            Console.WriteLine("Список книг пуст.");
+                            continue;
+                        }
+                        FoundBook(books);
                         break;
 
                     case "4":
@@ -99,7 +105,8 @@ namespace HomeLibrary
             if (author == null)
                 return;
 
-            int status = StatusReading();
+            message = "Введите статус чтения: ";
+            int status = StatusReading(message);
             if (status == 0)
                 return;
 
@@ -139,11 +146,11 @@ namespace HomeLibrary
 
         }
 
-        static int StatusReading() // Возвращает статус чтения книги
+        static int StatusReading(string message) // Возвращает статус чтения книги
         {
             while (true)
             {
-                Console.Write("\nВернуться в меню - x\n1 - Не начато \n2 - Читаю \n3 - Прочитано\nВведите статус чтения: ");
+                Console.Write($"\nВернуться в меню - x\n1 - Не начато \n2 - Читаю \n3 - Прочитано\n{message}");
                 string input = Console.ReadLine();
 
                 if (int.TryParse(input, out int status) && status >= 1 && status <= 3)
@@ -172,7 +179,7 @@ namespace HomeLibrary
         }
 
 
-        static void ShowAllBooks(List<ModelBook> books) // Показать все книги
+        static void ShowBooks(List<ModelBook> books) // Показать все книги
         {
             ShowColorStatusBookDelegate showColorStatusBook = ShowColorStatusBook;
             Console.WriteLine("\n===Список книг===\n");
@@ -180,7 +187,8 @@ namespace HomeLibrary
             Console.WriteLine(new string('-', 75));
             foreach (var book in books)
             {
-                Console.Write($"{book.Id, -5} {book.Name, -30} {book.Author, -20} {book.Grade, -10}");
+                string grade = book.Status == HomeLibrary.StatusReading.Finished ? book.Grade.ToString() : "-";
+                Console.Write($"{book.Id, -5} {book.Name, -30} {book.Author, -20} {grade, -10}");
                 showColorStatusBook(book);
             }
             Console.WriteLine();
@@ -225,7 +233,7 @@ namespace HomeLibrary
 
                 if (modelBook != null)
                 {
-                    int newStatus = StatusReading();
+                    int newStatus = StatusReading("Введите новый статус: ");
                     if (newStatus == 0)
                         return;
 
@@ -288,5 +296,46 @@ namespace HomeLibrary
             Console.ResetColor();
             Console.WriteLine($"{bar} {booksCount}\n");
         }
+
+        static void FoundBook(List<ModelBook> books)
+        {
+            Console.Write("\n1 - По названию книги\n2 - По автору\n3 - По статусу\nВыберите: ");
+            string input = Console.ReadLine();
+
+            List<ModelBook> foundBooks = new List<ModelBook>();
+
+            if (input == "1")
+            {
+                Console.Write("Введите название книги: ");
+                input = Console.ReadLine();
+
+                foundBooks = books.Where(b => b.Name.Contains(input, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else if (input == "2")
+            {
+                Console.Write("Введите имя автора: ");
+                input = Console.ReadLine();
+
+                foundBooks = books.Where(b => b.Author.Contains(input, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else if (input == "3")
+            {
+                int status = StatusReading("Введите, книги с каким статусом найти: ");
+                StatusReading fingBooksStatus = (StatusReading)status;
+
+                foundBooks = books.Where(b => b.Status == fingBooksStatus).ToList();
+            }
+
+            if (!foundBooks.Any())
+            {
+                Console.WriteLine("Книги не найдены.");
+            }
+            else
+            {
+                ShowBooks(foundBooks);
+            }
+
+        }
+
     }
 }
