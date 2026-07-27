@@ -32,7 +32,7 @@ namespace HomeLibrary
             bool isStarted = true;
             do
             {
-                Console.WriteLine("===Домашняя библиотека===");
+                Console.WriteLine("\n\n===Домашняя библиотека===");
                 Console.WriteLine("\n1 - Добавить книгу\n2 - Показать все книги\n3 - Найти книгу\n4 - Изменить статус чтения\n5 - Статистика\n6 - Изменить данные книги\n7 - Удалить книгу\n8 - Сохранить и выйти");
 
                 string input = Console.ReadLine();
@@ -89,6 +89,11 @@ namespace HomeLibrary
                         break;
 
                     case "7":
+                        if (!books.Any())
+                        {
+                            Console.WriteLine("Список книг пуст.");
+                        }
+                        DeleteBook(books);
                         break;
 
                     case "8":
@@ -170,7 +175,7 @@ namespace HomeLibrary
                 else if (input.ToLower() == "x")
                     return 0;
                 else
-                    Console.WriteLine("Некоректные данные.");
+                    Console.WriteLine("\nНекоректные данные.");
             }
         }
 
@@ -186,7 +191,7 @@ namespace HomeLibrary
                 else if (input.ToLower() == "x")
                     return 0;
                 else
-                    Console.WriteLine("Некоректные данные.");
+                    Console.WriteLine("\nНекоректные данные.");
             }
         }
 
@@ -195,7 +200,7 @@ namespace HomeLibrary
         {
             ShowColorStatusBookDelegate showColorStatusBook = ShowColorStatusBook;
             Console.WriteLine("\n===Список книг===\n");
-            Console.WriteLine($"{"ID", -5} {"Название", -30} {"Автор", -20} {"Оценка", -10} {"Статус", -5}");
+            Console.WriteLine($"{"№", -5} {"Название", -30} {"Автор", -20} {"Оценка", -10} {"Статус", -5}");
             Console.WriteLine(new string('-', 75));
             foreach (var book in books)
             {
@@ -203,7 +208,6 @@ namespace HomeLibrary
                 Console.Write($"{book.Id, -5} {book.Name, -30} {book.Author, -20} {grade, -10}");
                 showColorStatusBook(book);
             }
-            Console.WriteLine();
         }
 
         static ConsoleColor GetStatusColor(StatusReading status) // Возвращает цвет статуса чтения
@@ -266,7 +270,7 @@ namespace HomeLibrary
             }
             else
             {
-                Console.WriteLine("Некоректные данные.");
+                Console.WriteLine("\nНекоректные данные.");
                 return;
             }
         }
@@ -354,7 +358,6 @@ namespace HomeLibrary
             {
                 ShowBooks(foundBooks);
             }
-            Console.WriteLine();
         }
 
         static void ChangeBook(List<ModelBook> books) 
@@ -375,22 +378,16 @@ namespace HomeLibrary
 
                     if (input == "1")
                     {
-                        string newName = NameBookOrNameAuthor("Введите новое название: ");
-                        modelBook.Name = newName;
+                        modelBook.Name = NameBookOrNameAuthor("Введите новое название: ");
                     }
                     else if (input == "2")
                     {
-                        string newNameAuthor = NameBookOrNameAuthor("Введите новое имя автора: ");
-                        modelBook.Author = newNameAuthor;
+                        modelBook.Author = NameBookOrNameAuthor("Введите новое имя автора: ");
                     }
                     else
                     {
                         Console.WriteLine("Некоректные данные.");
                     }
-                }
-                else
-                {
-                    Console.WriteLine("Список книг пуст");
                 }
             }
             else if (input == "x")
@@ -412,6 +409,36 @@ namespace HomeLibrary
             foreach (var book in books) 
             {
                 Console.WriteLine($"{book.Id,-5} {book.Name,-30} {book.Author,-20}\n");
+            }
+        }
+
+        static void DeleteBook(List<ModelBook> books)
+        {
+            ShowBooks(books);
+            Console.Write("\nВернуться в меню - x\nВведите ID книги чтобы удалить ее: ");
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out int idBook))
+            {
+                var idDeleteBook = books.FirstOrDefault(b => b.Id == idBook);
+
+                if  (idDeleteBook != null)
+                {
+                    books.Remove(idDeleteBook);
+                    Console.WriteLine("Успешно");
+                }
+                else
+                {
+                    Console.WriteLine("Книга с указанным ID не найдена");
+                }
+            }
+            else if (input.ToLower() == "x")
+            {
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Некоректные данные.");
             }
         }
 
