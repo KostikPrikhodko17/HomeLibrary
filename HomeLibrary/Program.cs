@@ -33,7 +33,7 @@ namespace HomeLibrary
             do
             {
                 Console.WriteLine("\n\n===Домашняя библиотека===");
-                Console.WriteLine("\n1 - Добавить книгу\n2 - Показать все книги\n3 - Найти книгу\n4 - Изменить статус чтения\n5 - Статистика\n6 - Изменить данные книги\n7 - Удалить книгу\n8 - Сохранить и выйти");
+                Console.WriteLine("\n1 - Добавить книгу\n\n2 - Показать все книги\n\n3 - Найти книгу\n\n4 - Изменить статус чтения\n\n5 - Статистика\n\n6 - Изменить данные книги\n\n7 - Удалить книгу\n\n8 - Сохранить и выйти");
 
                 string input = Console.ReadLine();
 
@@ -44,61 +44,48 @@ namespace HomeLibrary
                         break;
 
                     case "2":
-                        if (books.Count == 0)
-                        {
-                            Console.WriteLine("Список книг пуст.");
-                            continue;
-                        }
+                        if (!books.Any())
+                            goto case "9";
                         ShowBooks(books);
                         break;
 
                     case "3":
-                        if (books.Count == 0)
-                        {
-                            Console.WriteLine("Список книг пуст.");
-                            continue;
-                        }
+                        if (!books.Any())
+                            goto case "9";
                         SearchBook(books);
                         break;
 
                     case "4":
-                        if (books.Count == 0)
-                        {
-                            Console.WriteLine("Список книг пуст.");
-                            continue;
-                        }
+                        if (!books.Any())
+                            goto case "9";
                         ChangeStatusBook(books);
                         break;
 
                     case "5":
-                        if (books.Count == 0)
-                        {
-                            Console.WriteLine("Список книг пуст.");
-                            continue;
-                        }
+                        if (!books.Any())
+                            goto case "9";
                         Statistics(books);
                         break;
 
                     case "6":
                         if (!books.Any())
-                        {
-                            Console.WriteLine("Список книг пуст.");
-                            continue;
-                        }
+                            goto case "9";
                         ChangeBook(books);
                         break;
 
                     case "7":
                         if (!books.Any())
-                        {
-                            Console.WriteLine("Список книг пуст.");
-                        }
+                            goto case "9";
                         DeleteBook(books);
                         break;
 
                     case "8":
                         SaveBooks(books, filePath);
                         isStarted = false;
+                        break;
+
+                    case "9":
+                        Console.WriteLine("\nСписок книг пуст");
                         break;
 
                     default:
